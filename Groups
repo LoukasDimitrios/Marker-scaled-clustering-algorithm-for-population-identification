@@ -1,0 +1,25 @@
+# Create groups
+groups <- list(
+  'CD4pos Naive' <- c("CD4", "CCR7", "CD45RA"),
+  'CD8pos Eff' <- c( "CD8", "CD25"),
+  'CD4pos CM' <- c("CD4", "CCR7", "CD45RA"),
+  'CD4pos Eff' <- c("CD4", "CD25"),
+  'CD4pos Treg' <- c("CD4", "CD25", "CD127"),
+  'NKT' <- c("CD56", "CD14", "CD19"),
+  'CD8pos Naive' <- c("CD8", "CCR7", "CD45RA"),
+  'B cells Naive' <- c("CD27", "CD38"),
+  'Monocytes CD16pos' <- c("CD16"),
+  'Monocytes CD16neg' <- c("CD16"),
+  'CD8pos EM' <- c("CD8", "CCR7", "CD45RA"),
+  'CD4pos EM' <- c("CD4", "CCR7", "CD45RA"),
+  'TCRgd' <- c("TCRgd"),
+  'B cells Transitional' <- c("CD27", "CD38"),
+  'pDCs' <- c("CD16", "HLADR", "CD123"),
+  'mDCs' <- c("CD16", "HLADR", "CD11c"),
+  'NK cells CD56bright' <- c("HLADR", "CD16", "CD56"),
+  'CD8pos CM' <- c("CD8", "CCR7", "CD45RA"),
+  'B cells Memory' <- c("CD27", "CD38"),
+  'Basophils' <- c("CD123", "CD38", "HLADR"),
+  'Plasmablasts' <- c("CD27", "CD38"),
+  'major pop markers' <- c("CD3", "CD19", "CD20", "CD14")
+)
