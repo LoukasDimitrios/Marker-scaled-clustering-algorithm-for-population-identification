@@ -1,8 +1,20 @@
 #Libraries
-#Load data
+source('Libraries')
 
-#Populations
+#Load data
+load("data_count.Rdata")
+
+# Load marker scaling groups defined by experts immunologists
+source('Groups.R')
+
+# Load Normalization chunk for marker scaling groups
+source('Normalization.R')
+
+#Examine Populations using PCA
+source('Populations.R')
+
 #Subpopulations
+source('Subpopulations.R')
 
 #GridSearch Unscaled
 #GridSearch Scaled - groups
