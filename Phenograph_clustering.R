@@ -29,4 +29,32 @@ print(scree_plot)
 print(pca_plot)
 
 
-result <- Rphenograph2(pca_result_scaled$x[, 1:best_p_unscaled], k = best_k_neighbors_unscaled, resolution = best_resolution_unscaled)
+result <- Rphenograph2(pca_result$x[, 1:best_p_unscaled], k = best_k_neighbors_unscaled, resolution = best_resolution_unscaled)
+
+# Get cluster assignments from Phenograph
+cluster_assignments <- result[[2]]$membership
+
+# Perform UMAP on the first 5 PCs
+umap_result <- umap(pca_result$x[, ])
+umap(pca_result$x[, ], batch = TRUE, n_threads = 32, verbose = FALSE, n_neighbors = 15, n_sgd_threads = "auto")
+
+# Create a data frame with UMAP results and cluster assignments
+umap_data <- data.frame(V1 = umap_result[, 1], V2 = umap_result[, 2], Cluster = factor(cluster_assignments))
+
+# Plot UMAP with cluster colors
+umap_plot <- ggplot(umap_data, aes(x = V1, y = V2, color = Cluster)) +
+  geom_point() +
+  labs(title = "UMAP Visualization with Phenograph Clusters (Unscaled)") +
+  guides(color = guide_legend(override.aes = list(size = 4))) +
+  theme_minimal()
+
+# Plot UMAP with cluster colors
+umap_plot_pops <- ggplot(umap_data, aes(x = V1, y = V2, color = pops_sub)) +
+  geom_point() +
+  labs(title = "UMAP Visualization with Populations (Unscaled)") +
+  guides(color = guide_legend(override.aes = list(size = 4))) +
+  theme_minimal()
+
+# Display the UMAP plot
+print(umap_plot_pops)
+print(umap_plot)
