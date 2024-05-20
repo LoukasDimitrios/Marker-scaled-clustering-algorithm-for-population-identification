@@ -1,4 +1,4 @@
-Load('Rphenograph_algorithm')
+source("Rphenograph_algorithm.R")
 
 ### PCA - UNSCALED vs UNSCALED
 
