@@ -17,7 +17,7 @@ The study analyzes raw mass cytometry data and two marker-scaled datasets using 
 -----------------
 
 
-## Marker scale Hypothesis
+# Marker scale Hypothesis
 The research project’s hypothesis was driven by the difficulties associated with conventional
 clustering techniques used in cytometry data. This can be summarized as follows:
 Clustering cytometry data poses a challenge because researchers have constraints on the
@@ -46,7 +46,7 @@ each anticipated cell type, ensuring that markers are fairly weighted in the clu
 process even when they are shared among multiple cell types. The hypothesis is that
 this improves the algorithm’s ability to effectively.
 
-### Population Group Markers
+## Population Group Markers
 
 | Population Group   | Markers                        |
 |--------------------|--------------------------------|
@@ -77,11 +77,11 @@ this improves the algorithm’s ability to effectively.
 -----------------
 
 
-## General flowchart
+# General flowchart
 ![Alt Text](flowchart.png)
 
 -----------------
 
-## Dataset
+# Dataset
 https://drive.google.com/file/d/1Xx5vSa4P-aiRD1f5tmPajv231fAUsnic/view?usp=drive_link
 
