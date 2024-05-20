@@ -1,8 +1,8 @@
 #Libraries
-source('Libraries.R')
+source('Scripts/Libraries.R')
 
 #Load data
-load("data_count.Rdata")
+load("Scripts/data_count.Rdata")
 
 # Create a Subset
 pops <- expr_count$population
@@ -19,35 +19,35 @@ pops_sub <- pops[subset]
 subpops_sub <- subpops[subset]
 
 # Load marker scaling groups defined by experts immunologists
-source('Groups.R')
+source('Scripts/Groups.R')
 
 # Load Normalization chunk for marker scaling groups
-source('Normalization.R')
+source('Scripts/Normalization.R')
 
 #Examine Populations using PCA
-source('Populations.R')
+source('Scripts/Populations.R')
 
 #Subpopulations
-source('Subpopulations.R')
+source('Scripts/Subpopulations.R')
 
 #Perform GridSearch on the Unscaled data
-source('GridSearch_unscaled.R')
+source('Scripts/GridSearch_unscaled.R')
 
 #Perform GridSearch on the Scaled data with groups defined by expert immunologists
-source('GridSearch_scaled.R')
+source('Scripts/GridSearch_scaled.R')
 
 #Perform GridSearch on the Scaled data with groups based on Log Fold Change
-source('Log-Fold-Change_groups.R')
-source('GridSearch_scaled_lfc.R')
+source('Scripts/Log-Fold-Change_groups.R')
+source('Scripts/GridSearch_scaled_lfc.R')
 
 
 # Perform Clustering on a bigger subset
 
 # Load marker scaling groups defined by experts immunologists
-source('Groups.R')
+source('Scripts/Groups.R')
 
 # Load Normalization chunk for marker scaling groups
-source('Normalization.R')
+source('Scripts/Normalization.R')
 
 # Create a bigger Subset data
 set.seed(42)
@@ -57,9 +57,9 @@ pops_sub <- pops[subset]
 subpops_sub <- subpops[subset]
 
 #Seurat
-source('Seurat_unscaled_clustering')
-source('Seurat_scaled_clustering')
+source('Scripts/Seurat_unscaled_clustering')
+source('Scripts/Seurat_scaled_clustering')
 
 #Phenograph
-source('Phenograph_clustering_unscaled.R')
-source('Phenograph_clustering_scaled.R')
+source('Scripts/Phenograph_clustering_unscaled.R')
+source('Scripts/Phenograph_clustering_scaled.R')
