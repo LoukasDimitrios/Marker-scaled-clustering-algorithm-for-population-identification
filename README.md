@@ -53,7 +53,7 @@ this improves the algorithm’s ability to effectively.
 
 
 
-First Header  | Second Header
+Population Group  | Markers
 ------------- | -------------
 Content Cell  | Content Cell
 Content Cell  | Content Cell
