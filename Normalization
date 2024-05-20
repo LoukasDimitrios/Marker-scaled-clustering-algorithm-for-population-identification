@@ -1,0 +1,6 @@
+# Normalization chunk 
+expr_sub_exp <- NULL
+for(i in 1:length(groups)) {
+  pca <- prcomp(expr_sub[,groups[[i]]], scale. = TRUE)
+  expr_sub_exp <- cbind(expr_sub_exp, as.matrix(expr_sub[,groups[[i]]]/pca$sdev[1]^2))
+}
