@@ -3,7 +3,6 @@
 
 
 ### Introduction:
------------------
 The immune system is crucial for human health, comprising innate and adaptive immunity. Understanding immune cell subsets aids in diagnosing and treating immune-related disorders. Single-cell cytometry, particularly mass cytometry (CyTOF), offers detailed insights into immune cell behavior but faces challenges in data analysis due to its complexity.
 
 ### Objective:
@@ -15,8 +14,7 @@ The algorithm incorporates predefined marker groups identified by immunologists,
 ### Methodology:
 The study analyzes raw mass cytometry data and two marker-scaled datasets using PhenoGraph and Seurat algorithms. Principal Component Analysis (PCA) adjusts marker group weights and aids visual interpretation. Clustering parameters are evaluated using the Adjusted Rand Index (ARI) to ensure effective cluster identification.
 
-
-============================================================================================
+-----------------
 
 
 ## Marker scale Hypothesis
