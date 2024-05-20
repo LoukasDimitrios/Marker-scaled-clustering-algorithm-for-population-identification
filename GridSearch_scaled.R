@@ -128,3 +128,14 @@ umap_plot_population_scaled <- ggplot(umap_data_population_scaled, aes(x = V1, y
 # Display plots for Scaled
 print(umap_plot_clusters_scaled)
 print(umap_plot_population_scaled)
+
+
+# Save each variable in an RData file
+save(
+  best_algorithm_scaled,
+  best_resolution_scaled,
+  best_k_neighbors_scaled,
+  best_p_scaled,
+  best_ari_scaled,
+  file = "best_params_scaled.RData"
+)
