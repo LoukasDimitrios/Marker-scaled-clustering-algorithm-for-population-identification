@@ -1,0 +1,610 @@
+## Libraries
+library(patchwork)
+library(ggplot2)
+library(factoextra)
+library(stats)
+library(uwot)
+library(ggfortify)
+library(igraph)
+library(cytofkit2)
+library(Seurat)
+
+
+# Subset count
+set.seed(42)
+pops <- expr_count$population
+subpops <- expr_count$subpopulation
+lineage_channels <- c("CD57", "CD19", "CD4", "CD8", "IgD", "CD11c", "CD16", "CD3", "CD38", "CD27", "CD14", "CXCR5", "CCR7", "CD45RA", "CD20", "CD127", "CD33", "CD28", "CD161", "TCRgd", "CD123", "CD56", "HLADR", "CD25")
+expr <- expr_count[,lineage_channels]
+
+
+# Subset data
+subset <- sample(nrow(expr), 10000)
+expr_sub <- expr[subset,]
+pops_sub <- pops[subset]
+subpops_sub <- subpops[subset]
+
+
+
+
+
+# Create groups
+groups <- list(
+  'CD4pos Naive' <- c("CD4", "CCR7", "CD45RA"),
+  'CD8pos Eff' <- c( "CD8", "CD25"),
+  'CD4pos CM' <- c("CD4", "CCR7", "CD45RA"),
+  'CD4pos Eff' <- c("CD4", "CD25"),
+  'CD4pos Treg' <- c("CD4", "CD25", "CD127"),
+  'NKT' <- c("CD56", "CD14", "CD19"),
+  'CD8pos Naive' <- c("CD8", "CCR7", "CD45RA"),
+  'B cells Naive' <- c("CD27", "CD38"),
+  'Monocytes CD16pos' <- c("CD16"),
+  'Monocytes CD16neg' <- c("CD16"),
+  'CD8pos EM' <- c("CD8", "CCR7", "CD45RA"),
+  'CD4pos EM' <- c("CD4", "CCR7", "CD45RA"),
+  'TCRgd' <- c("TCRgd"),
+  'B cells Transitional' <- c("CD27", "CD38"),
+  'pDCs' <- c("CD16", "HLADR", "CD123"),
+  'mDCs' <- c("CD16", "HLADR", "CD11c"),
+  'NK cells CD56bright' <- c("HLADR", "CD16", "CD56"),
+  'CD8pos CM' <- c("CD8", "CCR7", "CD45RA"),
+  'B cells Memory' <- c("CD27", "CD38"),
+  'Basophils' <- c("CD123", "CD38", "HLADR"),
+  'Plasmablasts' <- c("CD27", "CD38"),
+  'major pop markers' <- c("CD3", "CD19", "CD20", "CD14")
+)
+
+
+# Normalization chunk 
+expr_sub_exp <- NULL
+for(i in 1:length(groups)) {
+  pca <- prcomp(expr_sub[,groups[[i]]], scale. = TRUE)
+  expr_sub_exp <- cbind(expr_sub_exp, as.matrix(expr_sub[,groups[[i]]]/pca$sdev[1]^2))
+}
+
+
+# POPULATION - PCA vs UMAP  -  UNSCALED vs SCALED
+
+### PCA - UNSCALED vs UNSCALED
+
+
+
+
+# PCA - POPULATION without normalization (without division by PC1^2)
+pca_result <- prcomp(expr_sub, scale. = TRUE)  # Standardize the data
+
+# Create a scree plot to visualize the variance explained by each PC
+scree_plot <- fviz_eig(pca_result,
+                       addlabels = TRUE,
+                              title = "Scree plot UNSCALED")
+
+# PCA plot with population names in legends using the default color palette
+pca_plot <- fviz_pca_ind(pca_result, 
+                         geom.ind = "point", 
+                         col.ind = pops_sub,  # Color points by population
+                         addEllipses = TRUE, 
+                         ellipse.type = "confidence",
+                         legend.title = "Population",
+                         pointshape = 19,
+                         fill = pops_sub,
+                         title = "PCA visualization UNSCALED")  # Set fill aesthetic to population names
+
+pca_plot + theme_minimal()
+# Normalization and PCA
+expr_sub_exp <- NULL
+for(i in 1:length(groups)) {
+  pca <- prcomp(expr_sub[,groups[[i]]], scale. = TRUE)
+  expr_sub_exp <- cbind(expr_sub_exp, as.matrix(expr_sub[,groups[[i]]]/pca$sdev[1]^2))
+}
+
+# PCA scaled
+pca_result_scaled <- prcomp(expr_sub_exp, scale. = TRUE)
+
+scree_plot_scaled <- fviz_eig(pca_result_scaled,
+                              addlabels = TRUE,
+                              title = "Scree plot SCALED")
+
+# PCA plot with population names in legends using the default color palette
+pca_plot_scaled <- fviz_pca_ind(pca_result_scaled, 
+                         geom.ind = "point", 
+                         col.ind = pops_sub,  # Color points by population
+                         addEllipses = TRUE, 
+                         ellipse.type = "confidence",
+                         legend.title = "Population",
+                         pointshape = 19,
+                         fill = pops_sub,
+                         title = "PCA visualization SCALED")  # Set fill aesthetic to population names
+
+
+# UMAP - POPULATION plot UNSCALED
+#umap_result <- umap(expr_sub)
+
+# UMAP - POPULATION plot UNSCALED
+umap_result <- umap(expr_sub, batch = TRUE, n_threads = 32, verbose = TRUE, n_neighbors = 20, n_sgd_threads = "auto")
+
+# Create a data frame from UMAP results
+umap_data <- data.frame(V1 = umap_result[, 1], V2 = umap_result[, 2])
+
+# Add population information to the data frame
+umap_data$pops_sub <- pops_sub
+
+# UMAP plot with consistent colors and aesthetics
+umap_plot <- ggplot(umap_data, aes(x = V1, y = V2)) +
+  geom_point(aes(color = pops_sub)) +  # Color points by population
+  labs(x = "UMAP 1", y = "UMAP 2", color = "Populations") +  # Customize axis labels and legend title
+  #ggtitle("UMAP Visualization UNSCALED") +  # Add a title
+  guides(color = guide_legend(override.aes = list(size = 4))) +  # Adjust legend point size
+  theme_minimal()  # Set a minimal theme to match PCA plot style
+
+
+# UMAP - POPULATION plot SCALED
+#umap_result <- umap(expr_sub_exp)
+
+# UMAP - POPULATION plot UNSCALED
+umap_result <- umap(expr_sub_exp, batch = TRUE, n_threads = 32, verbose = TRUE, n_neighbors = 15, n_sgd_threads = "auto")
+
+# Create a data frame from UMAP results
+umap_data <- data.frame(V1 = umap_result[, 1], V2 = umap_result[, 2])
+
+# Add population information to the data frame
+umap_data$pops_sub <- pops_sub
+
+# UMAP plot with consistent colors
+umap_plot_scaled <- ggplot(umap_data, aes(x = V1, y = V2)) +
+  geom_point(aes(color = pops_sub)) +  # Color points by population
+  labs(x = "UMAP 1", y = "UMAP 2") +  # Customize axis labels
+  #ggtitle("UMAP Visualization SCALED") +  # Add a title
+  guides(color = guide_legend(override.aes = list(size = 4)))  +  # Adjust legend point size
+  theme_minimal()  # Set a minimal theme to match PCA plot style
+
+
+# Display the scree plot
+print(scree_plot)
+
+# Display the scree plot
+print(scree_plot_scaled)
+
+# Display the PCA plot
+print(pca_plot)
+                         
+# Display the PCA plot
+print(pca_plot_scaled) 
+
+# Display the UMAP plot
+print(umap_plot)
+
+# Display the UMAP plot
+print(umap_plot_scaled) 
+
+
+#####################  SUBPOPULATIONS  #####################
+
+# SUBPOPULATION - PCA vs UMAP -  UNSCALED vs SCALED
+# PCA - POPULATION without normalization (division without PC1^2)
+pca_result <- prcomp(expr_sub, scale. = TRUE)  # Standardize the data
+
+# Create a scree plot to visualize the variance explained by each PC
+scree_plot <- fviz_eig(pca_result, addlabels = TRUE)
+
+# PCA plot with population names in legends using the default color palette
+pca_plot <- fviz_pca_ind(pca_result, 
+                         geom.ind = "point", 
+                         col.ind = subpops_sub,  # Color points by population
+                         addEllipses = TRUE, 
+                         ellipse.type = "confidence",
+                         legend.title = "Subpopulation",
+                         pointshape = 19,
+                         fill = subpops_sub)  # Set fill aesthetic to population names
+
+
+# Normalization and PCA
+expr_sub_exp <- NULL
+for(i in 1:length(groups)) {
+  pca <- prcomp(expr_sub[,groups[[i]]], scale. = TRUE)
+  expr_sub_exp <- cbind(expr_sub_exp, as.matrix(expr_sub[,groups[[i]]]/pca$sdev[1]^2))
+}
+
+
+# PCA - POPULATION without normalization (division without PC1^2)
+pca_result_scaled <- prcomp(expr_sub_exp, scale. = TRUE)  # Standardize the data
+
+# Create a scree plot to visualize the variance explained by each PC
+scree_plot_scaled <- fviz_eig(pca_result_scaled, addlabels = TRUE)
+
+# PCA plot with population names in legends using the default color palette
+pca_plot_scaled <- fviz_pca_ind(pca_result_scaled, 
+                         geom.ind = "point", 
+                         col.ind = subpops_sub,  # Color points by population
+                         addEllipses = TRUE, 
+                         ellipse.type = "confidence",
+                         legend.title = "Subpopulation",
+                         pointshape = 19,
+                         fill = subpops_sub)  # Set fill aesthetic to population names
+
+
+# UMAP - POPULATION plot with normalization (division with PC1^2)
+umap_result <- umap(expr_sub)
+
+# Create a data frame from UMAP results
+umap_data <- data.frame(V1 = umap_result[, 1], V2 = umap_result[, 2])
+
+# Add population information to the data frame
+umap_data$pops_sub <- subpops_sub
+
+# UMAP plot with consistent colors and aesthetics
+umap_plot <- ggplot(umap_data, aes(x = V1, y = V2)) +
+  geom_point(aes(color = subpops_sub)) +  # Color points by population
+  labs(x = "UMAP 1", y = "UMAP 2", color = "Populations") +  # Customize axis labels and legend title
+  ggtitle("UMAP Visualization of PC1^2 Normalized Data") +  # Add a title
+  guides(color = guide_legend(override.aes = list(size = 4))) +  # Adjust legend point size
+  theme_minimal()  # Set a minimal theme to match PCA plot style
+
+
+umap_result <- umap(expr_sub_exp)
+
+# Create a data frame from UMAP results
+umap_data <- data.frame(V1 = umap_result[, 1], V2 = umap_result[, 2])
+
+# Add subpopulation information to the data frame
+umap_data$subpops_sub <- subpops_sub
+
+# UMAP plot with consistent colors
+umap_plot_scaled <- ggplot(umap_data, aes(x = V1, y = V2)) +
+  geom_point(aes(color = subpops_sub)) +  # Color points by subpopulation
+  labs(x = "UMAP 1", y = "UMAP 2") +  # Customize axis labels
+  ggtitle("UMAP Visualization of PC1^2 Normalized Data") +  # Add a title
+  guides(color = guide_legend(override.aes = list(size = 4)))  # Adjust legend point size
+
+
+
+
+
+# Display the scree plot
+print(scree_plot)
+
+# Display the scree plot
+print(scree_plot_scaled)
+
+# Display the PCA plot
+print(pca_plot)
+
+# Display the PCA plot
+print(pca_plot_scaled)
+
+# Display the UMAP plot
+print(umap_plot)
+
+# Display the UMAP plot
+print(umap_plot_scaled)
+
+
+# T cells - PCA vs UMAP -  UNSCALED vs SCALED
+
+# Define the T cell subpopulations you want to include
+t_cells_subpopulations <- c("CD4pos", "CD8pos", "NKT", "TCRgd")
+
+# Filter data for T cell subpopulations
+t_cells_indices <- pops_sub %in% t_cells_subpopulations
+expr_t_cells <- expr_sub[t_cells_indices,]
+pops_t_cells <- pops_sub[t_cells_indices]
+subpops_t_cells <- subpops_sub[t_cells_indices]
+
+# Perform PCA for T cell subpopulations
+pca_result_t_cells <- prcomp(expr_t_cells, scale. = TRUE)
+
+# Create a scree plot to visualize the variance explained by each PC
+scree_plot <- fviz_eig(pca_result_t_cells, addlabels = TRUE)
+
+# Create a PCA plot for T cell subpopulations with subpopulation labels
+pca_plot_t_cells <- fviz_pca_ind(pca_result_t_cells, 
+                                  geom.ind = "point", 
+                                  col.ind = as.factor(subpops_t_cells),  # Convert to factor
+                                  addEllipses = TRUE, 
+                                  ellipse.type = "confidence",
+                                  legend.title = "Subpopulation",
+                                  pointshape = 19) +
+  labs(title = "PCA for T Cell Subpopulations")
+
+
+
+# Normalize the data with division by PC1^2
+expr_sub_exp <- NULL
+for(i in 1:length(groups)) {
+  pca <- prcomp(expr_sub[,groups[[i]]], scale. = TRUE)
+  expr_sub_exp <- cbind(expr_sub_exp, as.matrix(expr_sub[,groups[[i]]]/pca$sdev[1]^2))
+}
+
+
+
+# Perform PCA for T cell subpopulations
+pca_result_t_cells_scaled <- prcomp(expr_sub_exp[t_cells_indices,], scale. = TRUE)
+
+# Create a scree plot to visualize the variance explained by each PC
+scree_plot_scaled <- fviz_eig(pca_result_t_cells_scaled, addlabels = TRUE)
+
+# Create a PCA plot for T cell subpopulations with subpopulation labels
+pca_plot_t_cells_scaled <- fviz_pca_ind(pca_result_t_cells_scaled, 
+                                  geom.ind = "point", 
+                                  col.ind = as.factor(subpops_t_cells),  # Convert to factor
+                                  addEllipses = TRUE, 
+                                  ellipse.type = "confidence",
+                                  legend.title = "Subpopulation",
+                                  pointshape = 19) +
+  labs(title = "PCA for T Cell Subpopulations")
+
+
+
+
+
+# Perform UMAP UNSCALED
+umap_result_t_cells <- umap(expr_sub[t_cells_indices,])
+
+# Create a data frame from UMAP results for T cell subpopulations
+umap_data_t_cells <- data.frame(V1 = umap_result_t_cells[, 1], V2 = umap_result_t_cells[, 2])
+
+# Add subpopulation information to the data frame for T cell subpopulations
+umap_data_t_cells$subpops_t_cells <- subpops_t_cells
+
+# UMAP plot for T cell subpopulations with consistent colors
+umap_plot_t_cells <- ggplot(umap_data_t_cells, aes(x = V1, y = V2)) +
+  geom_point(aes(color = subpops_t_cells)) +  # Color points by subpopulation
+  labs(x = "UMAP 1", y = "UMAP 2") +  # Customize axis labels
+  ggtitle("UMAP Visualization of PC1^2 Normalized Data for T Cell Subpopulations") +  # Add a title
+  guides(color = guide_legend(override.aes = list(size = 4)))  # Adjust legend point size
+
+
+
+# Perform UMAP on the PC1^2 normalized data (expr_sub_exp) for T cell subpopulations
+umap_result_t_cells <- umap(expr_sub_exp[t_cells_indices,])
+
+# Create a data frame from UMAP results for T cell subpopulations
+umap_data_t_cells <- data.frame(V1 = umap_result_t_cells[, 1], V2 = umap_result_t_cells[, 2])
+
+# Add subpopulation information to the data frame for T cell subpopulations
+umap_data_t_cells$subpops_t_cells <- subpops_t_cells
+
+# UMAP plot for T cell subpopulations with consistent colors
+umap_plot_t_cells_scaled <- ggplot(umap_data_t_cells, aes(x = V1, y = V2)) +
+  geom_point(aes(color = subpops_t_cells)) +  # Color points by subpopulation
+  labs(x = "UMAP 1", y = "UMAP 2") +  # Customize axis labels
+  ggtitle("UMAP Visualization of PC1^2 Normalized Data for T Cell Subpopulations") +  # Add a title
+  guides(color = guide_legend(override.aes = list(size = 4)))  # Adjust legend point size
+
+
+# Display PCA UNSCALED
+print(scree_plot)
+
+# Display PCA UNSCALED
+print(scree_plot_scaled)
+
+# Display PCA UNSCALED
+print(pca_plot_t_cells)
+
+# Display PCA UNSCALED
+print(pca_plot_t_cells_scaled)
+
+# Display the UMAP plot for T cell subpopulations UNSCALED
+print(umap_plot_t_cells)
+
+# Display the UMAP plot for T cell subpopulations UNSCALED
+print(umap_plot_t_cells_scaled)
+
+
+# B cells with SUBPOPULATIONS - PCA vs UMAP -  UNSCALED vs SCALED
+
+# Define the B cell subpopulations you want to include
+b_cells <- c("B cells")
+
+# Filter data for B cell subpopulations
+b_cells_indices <- pops_sub %in% b_cells
+expr_b_cells <- expr_sub[b_cells_indices,]
+pops_b_cells <- pops_sub[b_cells_indices]
+subpops_b_cells <- subpops_sub[b_cells_indices]
+
+# Perform PCA for B cell subpopulations
+pca_result_b_cells <- prcomp(expr_b_cells, scale. = TRUE)
+
+# Create a scree plot to visualize the variance explained by each PC
+scree_plot <- fviz_eig(pca_result_b_cells, addlabels = TRUE)
+
+# Create a PCA plot for B cell subpopulations with subpopulation labels
+pca_plot_b_cells <- fviz_pca_ind(pca_result_b_cells, 
+                                  geom.ind = "point", 
+                                  col.ind = as.factor(subpops_b_cells),  # Convert to factor
+                                  addEllipses = TRUE, 
+                                  ellipse.type = "confidence",
+                                  legend.title = "Subpopulation",
+                                  pointshape = 19) +
+  labs(title = "PCA for B Cell Subpopulations")
+
+# Normalize the data with division by PC1^2
+expr_sub_exp <- NULL
+for(i in 1:length(groups)) {
+  pca <- prcomp(expr_sub[,groups[[i]]], scale. = TRUE)
+  expr_sub_exp <- cbind(expr_sub_exp, as.matrix(expr_sub[,groups[[i]]]/pca$sdev[1]^2))
+}
+
+# Perform PCA for B cell subpopulations
+pca_result_b_cells_scaled <- prcomp(expr_sub_exp[b_cells_indices,], scale. = TRUE)
+
+# Create a scree plot to visualize the variance explained by each PC
+scree_plot_scaled <- fviz_eig(pca_result_b_cells_scaled, addlabels = TRUE)
+
+# Create a PCA plot for B cell subpopulations with subpopulation labels
+pca_plot_b_cells_scaled <- fviz_pca_ind(pca_result_b_cells_scaled, 
+                                  geom.ind = "point", 
+                                  col.ind = as.factor(subpops_b_cells),  # Convert to factor
+                                  addEllipses = TRUE, 
+                                  ellipse.type = "confidence",
+                                  legend.title = "Subpopulation",
+                                  pointshape = 19) +
+  labs(title = "PCA for B Cell Subpopulations")
+
+
+
+
+
+
+# Perform UMAP for B cell subpopulations UNSCALED
+umap_result_b_cells <- umap(expr_sub[b_cells_indices,])
+
+# Create a data frame from UMAP results for B cell subpopulations
+umap_data_b_cells <- data.frame(V1 = umap_result_b_cells[, 1], V2 = umap_result_b_cells[, 2])
+
+# Add subpopulation information to the data frame for B cell subpopulations
+umap_data_b_cells$subpops_b_cells <- subpops_b_cells
+
+# UMAP plot for B cell subpopulations with consistent colors
+umap_plot_b_cells <- ggplot(umap_data_b_cells, aes(x = V1, y = V2)) +
+  geom_point(aes(color = subpops_b_cells)) +  # Color points by subpopulation
+  labs(x = "UMAP 1", y = "UMAP 2") +  # Customize axis labels
+  ggtitle("UMAP Visualization of PC1^2 Normalized Data for B Cell Subpopulations") +  # Add a title
+  guides(color = guide_legend(override.aes = list(size = 4)))  # Adjust legend point size
+
+
+
+# Perform UMAP for B cell subpopulations SCALED
+umap_result_b_cells <- umap(expr_sub_exp[b_cells_indices,])
+
+# Create a data frame from UMAP results for B cell subpopulations
+umap_data_b_cells <- data.frame(V1 = umap_result_b_cells[, 1], V2 = umap_result_b_cells[, 2])
+
+# Add subpopulation information to the data frame for B cell subpopulations
+umap_data_b_cells$subpops_b_cells <- subpops_b_cells
+
+# UMAP plot for B cell subpopulations with consistent colors
+umap_plot_b_cells_scaled <- ggplot(umap_data_b_cells, aes(x = V1, y = V2)) +
+  geom_point(aes(color = subpops_b_cells)) +  # Color points by subpopulation
+  labs(x = "UMAP 1", y = "UMAP 2") +  # Customize axis labels
+  ggtitle("UMAP Visualization of PC1^2 Normalized Data for B Cell Subpopulations") +  # Add a title
+  guides(color = guide_legend(override.aes = list(size = 4)))  # Adjust legend point size
+
+
+
+# Display PCA UNSCALED
+print(scree_plot)
+
+# Display PCA UNSCALED
+print(scree_plot_scaled)
+
+# Display PCA UNSCALED
+print(pca_plot_b_cells)
+
+# Display PCA UNSCALED
+print(pca_plot_b_cells_scaled)
+
+# Display the UMAP plot for T cell subpopulations UNSCALED
+print(umap_plot_b_cells)
+
+# Display the UMAP plot for T cell subpopulations UNSCALED
+print(umap_plot_b_cells_scaled)
+
+
+# Monocytes with SUBPOPULATIONS - PCA vs UMAP -  UNSCALED vs SCALED
+
+# Define the Monocyte subpopulations you want to include
+monocytes <- c("Monocytes")
+
+# Filter data for Monocyte subpopulations
+monocyte_indices <- pops_sub %in% monocytes
+expr_monocytes <- expr_sub[monocyte_indices,]
+pops_monocytes <- pops_sub[monocyte_indices]
+subpops_monocytes <- subpops_sub[monocyte_indices]
+
+# Perform PCA for Monocyte subpopulations
+pca_result_monocytes <- prcomp(expr_monocytes, scale. = TRUE)
+
+# Create a scree plot to visualize the variance explained by each PC
+scree_plot <- fviz_eig(pca_result_monocytes, addlabels = TRUE)
+
+# Create a PCA plot for Monocyte subpopulations with subpopulation labels
+pca_plot_monocytes <- fviz_pca_ind(pca_result_monocytes, 
+                                  geom.ind = "point", 
+                                  col.ind = as.factor(subpops_monocytes),  # Convert to factor
+                                  addEllipses = TRUE, 
+                                  ellipse.type = "confidence",
+                                  legend.title = "Subpopulation",
+                                  pointshape = 19) +
+  labs(title = "PCA for Monocyte Subpopulations")
+
+
+
+# Normalize the data with division by PC1^2
+expr_sub_exp <- NULL
+for(i in 1:length(groups)) {
+  pca <- prcomp(expr_sub[,groups[[i]]], scale. = TRUE)
+  expr_sub_exp <- cbind(expr_sub_exp, as.matrix(expr_sub[,groups[[i]]]/pca$sdev[1]^2))
+}
+
+# Perform PCA for Monocyte subpopulations
+pca_result_monocytes_scaled <- prcomp(expr_sub_exp[monocyte_indices,], scale. = TRUE)
+
+# Create a scree plot to visualize the variance explained by each PC
+scree_plot_scaled <- fviz_eig(pca_result_monocytes_scaled, addlabels = TRUE)
+
+# Create a PCA plot for Monocyte subpopulations with subpopulation labels
+pca_plot_monocytes_scaled <- fviz_pca_ind(pca_result_monocytes_scaled, 
+                                  geom.ind = "point", 
+                                  col.ind = as.factor(subpops_monocytes),  # Convert to factor
+                                  addEllipses = TRUE, 
+                                  ellipse.type = "confidence",
+                                  legend.title = "Subpopulation",
+                                  pointshape = 19) +
+  labs(title = "PCA for Monocyte Subpopulations")
+
+
+
+# Perform UMAP on the PC1^2 normalized data (expr_sub_exp) for Monocyte subpopulations
+umap_result_monocytes <- umap(expr_sub[monocyte_indices,])
+
+# Create a data frame from UMAP results for Monocyte subpopulations
+umap_data_monocytes <- data.frame(V1 = umap_result_monocytes[, 1], V2 = umap_result_monocytes[, 2])
+
+# Add subpopulation information to the data frame for Monocyte subpopulations
+umap_data_monocytes$subpops_monocytes <- subpops_monocytes
+
+# UMAP plot for Monocyte subpopulations with consistent colors
+umap_plot_monocytes <- ggplot(umap_data_monocytes, aes(x = V1, y = V2)) +
+  geom_point(aes(color = subpops_monocytes)) +  # Color points by subpopulation
+  labs(x = "UMAP 1", y = "UMAP 2") +  # Customize axis labels
+  ggtitle("UMAP Visualization of PC1^2 Normalized Data for Monocyte Subpopulations") +  # Add a title
+  guides(color = guide_legend(override.aes = list(size = 4)))  # Adjust legend point size
+
+
+
+# Perform UMAP on the PC1^2 normalized data (expr_sub_exp) for Monocyte subpopulations
+umap_result_monocytes <- umap(expr_sub_exp[monocytes_indices,])
+
+# Create a data frame from UMAP results for Monocyte subpopulations
+umap_data_monocytes <- data.frame(V1 = umap_result_monocytes[, 1], V2 = umap_result_monocytes[, 2])
+
+# Add subpopulation information to the data frame for Monocyte subpopulations
+umap_data_monocytes$subpops_monocytes <- subpops_monocytes
+
+# UMAP plot for Monocyte subpopulations with consistent colors
+umap_plot_monocytes_scaled <- ggplot(umap_data_monocytes, aes(x = V1, y = V2)) +
+  geom_point(aes(color = subpops_monocytes)) +  # Color points by subpopulation
+  labs(x = "UMAP 1", y = "UMAP 2") +  # Customize axis labels
+  ggtitle("UMAP Visualization of PC1^2 Normalized Data for Monocyte Subpopulations") +  # Add a title
+  guides(color = guide_legend(override.aes = list(size = 4)))  # Adjust legend point size
+
+
+# Display PCA UNSCALED
+print(scree_plot)
+
+# Display PCA UNSCALED
+print(scree_plot_scaled)
+
+# Display the PCA plot for Monocyte subpopulations
+print(pca_plot_monocytes)
+
+
+# Display the PCA plot for Monocyte subpopulations
+print(pca_plot_monocytes_scaled)
+
+
+# Display the UMAP plot for Monocyte subpopulations
+print(umap_plot_monocytes)
+
+# Display the UMAP plot for Monocyte subpopulations
+print(umap_plot_monocytes_scaled)
