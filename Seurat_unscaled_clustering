@@ -15,11 +15,18 @@ data <- FindVariableFeatures(data, nfeatures = 24)
 
 
 data <- RunPCA(data, npcs = 24)  # Adjust the number of principal components as needed
-data <- FindNeighbors(data, compute.SNN = TRUE)  # Replace with the number of desired dimensions
-data <- FindClusters(data, resolution = 0.28, algorithm = 1)  # Adjust the resolution parameter as needed
+
+# Given factor
+best_algorithm_unscaled <- factor(best_algorithm_unscaled, levels = c("louvain", "leiden", "slm"))
+
+# Get the integer code for the factor level
+best_algorithm_unscaled <- as.numeric(best_algorithm_unscaled)
+
+data <- FindNeighbors(data, compute.SNN = TRUE, dims = 1:best_p_unscaled, k.param = best_k_neighbors_unscaled)  # Replace with the number of desired dimensions
+data <- FindClusters(data, resolution = best_resolution_unscaled, algorithm = best_algorithm_unscaled)  # Adjust the resolution parameter as needed
 
 # Get PCA from Seurat object
-selected_pcs <- data@reductions$pca@cell.embeddings
+selected_pcs <- data@reductions$pca@cell.embeddings[,1:best_p_scaled]
 
 # Get cluster assignments from Seurat
 cluster_assignments <- data@meta.data$seurat_clusters
