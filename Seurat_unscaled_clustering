@@ -1,0 +1,60 @@
+# SNN
+matrix_data <- as.matrix(expr_sub)
+matrix_data <- t(matrix_data)
+
+# Convert the matrix to a dgCMatrix
+dgCMatrix_data <- as(matrix_data, "dgCMatrix")
+data <- CreateSeuratObject(counts = dgCMatrix_data)
+
+
+
+#data <- CreateSeuratObject(counts = dgCMatrix_data)
+data <- NormalizeData(data)
+data <- ScaleData(data)
+data <- FindVariableFeatures(data, nfeatures = 24)
+
+
+data <- RunPCA(data, npcs = 24)  # Adjust the number of principal components as needed
+data <- FindNeighbors(data, compute.SNN = TRUE)  # Replace with the number of desired dimensions
+data <- FindClusters(data, resolution = 0.28, algorithm = 1)  # Adjust the resolution parameter as needed
+
+# Get PCA from Seurat object
+selected_pcs <- data@reductions$pca@cell.embeddings
+
+# Get cluster assignments from Seurat
+cluster_assignments <- data@meta.data$seurat_clusters
+
+# UMAP
+umap_result <- umap(selected_pcs, batch = TRUE, n_threads = 32, verbose = TRUE, n_neighbors = 15, n_sgd_threads = "auto")
+
+
+
+# SEURAT CLUSTERS - PLOT
+
+# Create a data frame from UMAP results
+umap_data_clusters <- data.frame(V1 = umap_result[, 1], V2 = umap_result[, 2], Cluster = factor(cluster_assignments))
+
+# Plot UMAP with cluster colors
+umap_plot_clusters <- ggplot(umap_data_clusters, aes(x = V1, y = V2, color = Cluster)) +
+  geom_point() +
+  labs(title = "UMAP - Seurat Clusters (Unscaled)") +
+  guides(color = guide_legend(override.aes = list(size = 4))) +
+  theme_minimal()
+
+# POPULATION - PLOT
+
+# Create a data frame from UMAP results
+umap_data_population <- data.frame(V1 = umap_result[, 1], V2 = umap_result[, 2])
+
+# Add population information to the data frame
+umap_data_population$pops_sub <- pops_sub
+
+# Plot UMAP with population colors
+umap_plot_population <- ggplot(umap_data_population, aes(x = V1, y = V2, color = pops_sub)) +
+  geom_point() +
+  labs(title = "UMAP - Populations (Unscaled)") +
+  guides(color = guide_legend(override.aes = list(size = 4))) +
+  theme_minimal()
+
+print(umap_plot_clusters)
+print(umap_plot_population)
