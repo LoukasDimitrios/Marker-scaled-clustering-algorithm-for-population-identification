@@ -20,4 +20,4 @@ The study analyzes raw mass cytometry data and two marker-scaled datasets using 
 https://drive.google.com/file/d/1Xx5vSa4P-aiRD1f5tmPajv231fAUsnic/view?usp=drive_link
 
 
-![Alt Text]([https://drive.google.com/file/d/1rZ3tEbNA9ygwME5Br-AtqgL41uRdYWXh/view?usp=drive_link]
+![Alt Text](flowchart.png)
