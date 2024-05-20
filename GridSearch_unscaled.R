@@ -117,3 +117,14 @@ umap_plot_population_unscaled <- ggplot(umap_data_population_unscaled, aes(x = V
 # Display plots for unscaled
 print(umap_plot_clusters_unscaled)
 print(umap_plot_population_unscaled)
+
+
+# Save each variable in an RData file
+save(
+  best_algorithm_unscaled,
+  best_resolution_unscaled,
+  best_k_neighbors_unscaled,
+  best_p_unscaled,
+  best_ari_unscaled,
+  file = "best_params_unscaled.RData"
+)
