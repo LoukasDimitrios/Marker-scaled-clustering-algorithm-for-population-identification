@@ -16,11 +16,7 @@ The study analyzes raw mass cytometry data and two marker-scaled datasets using 
 
 
 
-# Dataset
-https://drive.google.com/file/d/1Xx5vSa4P-aiRD1f5tmPajv231fAUsnic/view?usp=drive_link
 
-# General flowchart
-![Alt Text](flowchart.png)
 
 # Marker scale Hypothesis
 The research project’s hypothesis was driven by the difficulties associated with conventional
@@ -53,7 +49,40 @@ this improves the algorithm’s ability to effectively.
 
 
 
-Population Group  | Markers
-------------- | -------------
-Content Cell  | Content Cell
-Content Cell  | Content Cell
+| Population Group   | Markers                        |
+|--------------------|--------------------------------|
+| CD4pos Naive       | CD4, CCR7, CD45RA              |
+| CD8pos Eff         | CD8, CD25                      |
+| CD4pos CM          | CD4, CCR7, CD45RA              |
+| CD4pos Eff         | CD4, CD25                      |
+| CD4pos Treg        | CD4, CD25, CD127               |
+| NKT                | CD56, CD14, CD19               |
+| CD8pos Naive       | CD8, CCR7, CD45RA              |
+| B cells Naive      | CD27, CD38                     |
+| Monocytes          | CD16pos, CD16neg               |
+| CD8pos EM          | CD8, CCR7, CD45RA              |
+| CD4pos EM          | CD4, CCR7, CD45RA              |
+| TCRgd              | TCRgd                          |
+| B cells Transitional | CD27, CD38                   |
+| pDCs               | CD16, HLADR, CD123             |
+| mDCs               | CD16, HLADR, CD11c             |
+| NK cells           | CD56bright, HLADR, CD16, CD56 |
+| CD8pos CM          | CD8, CCR7, CD45RA              |
+| B cells Memory     | CD27, CD38                     |
+| Basophils          | CD123, CD38, HLADR             |
+| Plasmablasts       | CD27, CD38                     |
+| major pop markers  | CD3, CD19, CD20, CD14          |
+
+
+
+
+
+
+
+# General flowchart
+![Alt Text](flowchart.png)
+
+
+# Dataset
+https://drive.google.com/file/d/1Xx5vSa4P-aiRD1f5tmPajv231fAUsnic/view?usp=drive_link
+
