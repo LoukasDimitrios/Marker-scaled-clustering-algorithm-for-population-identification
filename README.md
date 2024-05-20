@@ -21,3 +21,39 @@ https://drive.google.com/file/d/1Xx5vSa4P-aiRD1f5tmPajv231fAUsnic/view?usp=drive
 
 # General flowchart
 ![Alt Text](flowchart.png)
+
+# Marker scale Hypothesis
+The research project’s hypothesis was driven by the difficulties associated with conventional
+clustering techniques used in cytometry data. This can be summarized as follows:
+Clustering cytometry data poses a challenge because researchers have constraints on the
+number of markers they can simultaneously measure in a single experiment, thus requiring
+careful marker selection due to the limited panel size. More specifically, in flow cytometry,
+spectral overlap restricts the number of fluorescent markers that can be simultaneously
+analyzed, while in mass cytometry, the limitation arises from a narrower range of available
+metal isotope-labeled antibodies compared to fluorescent ones. While some cell types are
+identified by only a few lineage markers, others depend on a more comprehensive set of
+markers. This difference in marker representation can create challenges for distance-based
+clustering algorithms, as they may face difficulty in appropriately weighting the markers,
+especially when markers are associated with multiple cell types. This complicates the
+accurate separation of cell populations and undermines the effectiveness of unsupervised
+clustering methods.
+
+To address these challenges, this research emphasizes the significance of a user-informed
+clustering approach. This method allows researchers to incorporate their insights into the
+selection of markers for analysis based on their knowledge about biology and experimental
+design, thus improving the algorithm’s ability to achieve precise separation of cell populations
+by leveraging researchers’ expertise. In this research, we leverage groups defined by
+immunologist experts to guide the selection of markers and enhance the clustering process.
+
+In response to the marker weighting challenge, Principal Component Analysis scaling can
+be used to tackle this issue. PCA scaling is performed to standardize marker sets for
+each anticipated cell type, ensuring that markers are fairly weighted in the clustering
+process even when they are shared among multiple cell types. The hypothesis is that
+this improves the algorithm’s ability to effectively.
+
+
+
+First Header  | Second Header
+------------- | -------------
+Content Cell  | Content Cell
+Content Cell  | Content Cell
