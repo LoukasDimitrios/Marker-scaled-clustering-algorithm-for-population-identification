@@ -1,3 +1,5 @@
+Load('Rphenograph_algorithm')
+
 ### PCA - UNSCALED vs UNSCALED
 
 
@@ -25,3 +27,6 @@ print(scree_plot)
 
 # Display the PCA plot
 print(pca_plot)
+
+
+result <- Rphenograph2(pca_result_scaled$x[, 1:best_p_unscaled], k = best_k_neighbors_unscaled, resolution = best_resolution_unscaled)
