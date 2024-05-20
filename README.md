@@ -39,7 +39,7 @@ clustering approach. This method allows researchers to incorporate their insight
 selection of markers for analysis based on their knowledge about biology and experimental
 design, thus improving the algorithm’s ability to achieve precise separation of cell populations
 by leveraging researchers’ expertise. In this research, we leverage groups defined by
-immunologist experts to guide the selection of markers and enhance the clustering process.
+immunologist experts to guide the selection of markers and enhance the clustering process, as shown in the table below.
 
 In response to the marker weighting challenge, Principal Component Analysis scaling can
 be used to tackle this issue. PCA scaling is performed to standardize marker sets for
@@ -47,7 +47,7 @@ each anticipated cell type, ensuring that markers are fairly weighted in the clu
 process even when they are shared among multiple cell types. The hypothesis is that
 this improves the algorithm’s ability to effectively.
 
-
+## Population Group Markers
 
 | Population Group   | Markers                        |
 |--------------------|--------------------------------|
