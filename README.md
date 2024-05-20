@@ -13,3 +13,8 @@ The algorithm incorporates predefined marker groups identified by immunologists,
 
 ## Methodology:
 The study analyzes raw mass cytometry data and two marker-scaled datasets using PhenoGraph and Seurat algorithms. Principal Component Analysis (PCA) adjusts marker group weights and aids visual interpretation. Clustering parameters are evaluated using the Adjusted Rand Index (ARI) to ensure effective cluster identification.
+
+
+
+# Dataset
+https://drive.google.com/file/d/1Xx5vSa4P-aiRD1f5tmPajv231fAUsnic/view
